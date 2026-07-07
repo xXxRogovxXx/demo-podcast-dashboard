@@ -913,6 +913,29 @@ if page == "📊 Общая аналитика":
 # ============================================
 elif page == "📋 Анализ выпуска":
     st.markdown('<div class="page-title">📋 Детальный анализ выпуска</div>', unsafe_allow_html=True)
+
+    # ВОТ СЮДА ВСТАВЛЯЕМ CSS ДЛЯ RADIO BUTTONS
+    st.markdown("""
+    <style>
+        div[role="radiogroup"] label {
+            background: linear-gradient(135deg, #f093fb 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700 !important;
+            font-size: 1.1rem !important;
+        }
+        
+        div[role="radiogroup"] label:hover {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transform: scale(1.05);
+            transition: all 0.3s ease;
+        }
+    </style>
+    """, unsafe_allow_html=True)
     
     st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
     period = st.radio(
@@ -1142,6 +1165,29 @@ elif page == "📋 Анализ выпуска":
 # ============================================
 else:
     st.markdown('<div class="page-title">🔄 Сравнение двух выпусков</div>', unsafe_allow_html=True)
+
+    # ВОТ СЮДА ВСТАВЛЯЕМ CSS ДЛЯ RADIO BUTTONS
+    st.markdown("""
+    <style>
+        div[role="radiogroup"] label {
+            background: linear-gradient(135deg, #f093fb 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700 !important;
+            font-size: 1.1rem !important;
+        }
+        
+        div[role="radiogroup"] label:hover {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transform: scale(1.05);
+            transition: all 0.3s ease;
+        }
+    </style>
+    """, unsafe_allow_html=True)
     
     st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
     period = st.radio(
