@@ -797,38 +797,100 @@ if page == "📊 Общая аналитика":
     """, unsafe_allow_html=True)
 
     with st.expander("ℹ️ Информация о данных", expanded=False):
+        # Добавляем глобальный CSS для принудительного белого текста в expander
+        st.markdown("""
+        <style>
+            /* Принудительно делаем весь текст в expander белым */
+            div[data-testid="stExpander"] * {
+                color: #ffffff !important;
+            }
+            /* Заголовки остаются розовыми */
+            div[data-testid="stExpander"] strong {
+                color: #f093fb !important;
+                text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        
         col1, col2, col3 = st.columns(3)
         with col1:
             st.markdown(f"""
-            <div style="color: #ffffff !important; font-size: 1rem; font-weight: 500 !important;">
-                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📅 Период</strong><br>
-                <span style="color: #ffffff !important;">{filtered_data['Дата прослушивания'].min().date()} — {filtered_data['Дата прослушивания'].max().date()}</span>
+            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+                        padding: 15px; 
+                        border-radius: 10px; 
+                        border: 1px solid #f093fb;
+                        color: #ffffff !important;
+                        font-size: 1rem;">
+                <strong style="color: #f093fb !important; font-size: 1.1rem;">📅 Период</strong><br>
+                <span style="color: #ffffff !important; font-size: 1.2rem; font-weight: bold;">
+                    {filtered_data['Дата прослушивания'].min().date()} — {filtered_data['Дата прослушивания'].max().date()}
+                </span>
             </div>
-            <div style="color: #ffffff !important; font-size: 1rem; margin-top: 0.8rem; font-weight: 500 !important;">
-                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📊 Всего записей</strong><br>
-                <span style="color: #ffffff !important;">{len(filtered_data):,}</span>
+            <br>
+            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+                        padding: 15px; 
+                        border-radius: 10px; 
+                        border: 1px solid #f093fb;
+                        color: #ffffff !important;
+                        font-size: 1rem;">
+                <strong style="color: #f093fb !important; font-size: 1.1rem;">📊 Всего записей</strong><br>
+                <span style="color: #ffffff !important; font-size: 1.2rem; font-weight: bold;">
+                    {len(filtered_data):,}
+                </span>
             </div>
             """, unsafe_allow_html=True)
+        
         with col2:
             st.markdown(f"""
-            <div style="color: #ffffff !important; font-size: 1rem; font-weight: 500 !important;">
-                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📝 Уникальных выпусков</strong><br>
-                <span style="color: #ffffff !important;">{filtered_data['Выпуск'].nunique()}</span>
+            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+                        padding: 15px; 
+                        border-radius: 10px; 
+                        border: 1px solid #f093fb;
+                        color: #ffffff !important;
+                        font-size: 1rem;">
+                <strong style="color: #f093fb !important; font-size: 1.1rem;">📝 Уникальных выпусков</strong><br>
+                <span style="color: #ffffff !important; font-size: 1.2rem; font-weight: bold;">
+                    {filtered_data['Выпуск'].nunique()}
+                </span>
             </div>
-            <div style="color: #ffffff !important; font-size: 1rem; margin-top: 0.8rem; font-weight: 500 !important;">
-                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">🎭 Жанры</strong><br>
-                <span style="color: #ffffff !important;">{', '.join(filtered_data['Жанр'].unique())}</span>
+            <br>
+            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+                        padding: 15px; 
+                        border-radius: 10px; 
+                        border: 1px solid #f093fb;
+                        color: #ffffff !important;
+                        font-size: 1rem;">
+                <strong style="color: #f093fb !important; font-size: 1.1rem;">🎭 Жанры</strong><br>
+                <span style="color: #ffffff !important; font-size: 1rem;">
+                    {', '.join(filtered_data['Жанр'].unique())}
+                </span>
             </div>
             """, unsafe_allow_html=True)
+        
         with col3:
             st.markdown(f"""
-            <div style="color: #ffffff !important; font-size: 1rem; font-weight: 500 !important;">
-                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📂 Форматы</strong><br>
-                <span style="color: #ffffff !important;">{', '.join(filtered_data['Формат'].unique())}</span>
+            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+                        padding: 15px; 
+                        border-radius: 10px; 
+                        border: 1px solid #f093fb;
+                        color: #ffffff !important;
+                        font-size: 1rem;">
+                <strong style="color: #f093fb !important; font-size: 1.1rem;">📂 Форматы</strong><br>
+                <span style="color: #ffffff !important; font-size: 1rem;">
+                    {', '.join(filtered_data['Формат'].unique())}
+                </span>
             </div>
-            <div style="color: #ffffff !important; font-size: 1rem; margin-top: 0.8rem; font-weight: 500 !important;">
-                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">⭐ Средний RSI</strong><br>
-                <span style="color: #ffffff !important;">{episode_summary['RSI'].mean():.1f}</span>
+            <br>
+            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+                        padding: 15px; 
+                        border-radius: 10px; 
+                        border: 1px solid #f093fb;
+                        color: #ffffff !important;
+                        font-size: 1rem;">
+                <strong style="color: #f093fb !important; font-size: 1.1rem;">⭐ Средний RSI</strong><br>
+                <span style="color: #ffffff !important; font-size: 1.2rem; font-weight: bold;">
+                    {episode_summary['RSI'].mean():.1f}
+                </span>
             </div>
         """, unsafe_allow_html=True)
 
