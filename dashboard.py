@@ -963,23 +963,23 @@ elif page == "📋 Анализ выпуска":
     st.markdown('<div class="page-title">📋 Детальный анализ выпуска</div>', unsafe_allow_html=True)
     
     st.markdown("""
-<style>
-    div[data-testid="stRadio"] label p {
-        color: #ffffff !important;
-        font-size: 1.2rem !important;
-        font-weight: 700 !important;
-        text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
-    }
-</style>
-""", unsafe_allow_html=True)
+    <style>
+        div[data-testid="stRadio"] label p {
+            color: #ffffff !important;
+            font-size: 1.2rem !important;
+            font-weight: 700 !important;
+            text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-period = st.radio(
+    period = st.radio(
     "📅 Выберите период анализа:",
     ["1 день", "1 неделя", "1 месяц", "Всё время"],
     horizontal=True,
     index=3,
     key="analysis_period"
-)
+    )
     
     # Используем хронологический порядок из справочника
     selected_short = st.selectbox(
@@ -1207,23 +1207,23 @@ else:
     st.markdown('<div class="page-title">🔄 Сравнение двух выпусков</div>', unsafe_allow_html=True)
     
     st.markdown("""
-<style>
-    div[data-testid="stRadio"] label p {
-        color: #ffffff !important;
-        font-size: 1.2rem !important;
-        font-weight: 700 !important;
-        text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
-    }
-</style>
-""", unsafe_allow_html=True)
+    <style>
+        div[data-testid="stRadio"] label p {
+            color: #ffffff !important;
+            font-size: 1.2rem !important;
+            font-weight: 700 !important;
+            text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-period = st.radio(
+    period = st.radio(
     "📅 Выберите период анализа:",
     ["1 день", "1 неделя", "1 месяц", "Всё время"],
     horizontal=True,
     index=3,
     key="analysis_period"
-)
+    )
     
     col1, col2 = st.columns(2)
     with col1:
