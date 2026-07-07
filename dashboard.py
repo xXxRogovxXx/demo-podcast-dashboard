@@ -349,8 +349,8 @@ st.markdown("""
     }
 
     
-    /* Белый цвет ТОЛЬКО для radio с периодами */
-    div[data-testid="stHorizontalRadio"] label div[class*="st-c5 st-cj st-ck"] {
+        /* Белый цвет ТОЛЬКО для radio button значений (1 день, 1 неделя и т.д.) */
+    div[data-testid="stHorizontalRadio"] div[data-testid="stMarkdownContainer"] p {
         color: #ffffff !important;
         font-size: 1.15rem !important;
         font-weight: 700 !important;
