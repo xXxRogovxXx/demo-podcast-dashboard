@@ -367,7 +367,8 @@ st.markdown("""
         font-weight: 600 !important;
         text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
     }
-        /* Белый цвет для radio button labels */
+    
+    /* Белый цвет для radio button labels */
     div[class*="st-c5 st-cj st-ck"] {
         color: #ffffff !important;
         font-size: 1.15rem !important;
@@ -375,6 +376,26 @@ st.markdown("""
         text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
     }
     
+    /* Стили для expander */
+    div[data-testid="stExpander"] details summary p {
+        color: #f093fb !important;
+        font-size: 1.2rem !important;
+        font-weight: bold !important;
+        text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
+    }
+    
+    div[data-testid="stExpander"] * {
+        color: #ffffff !important;
+    }
+    
+    div[data-testid="stExpander"] strong {
+        color: #f093fb !important;
+        text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
+    }
+    
+    div[data-testid="stExpander"] details summary svg {
+        fill: #f093fb !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -460,6 +481,61 @@ def get_episode_position(episode_data, all_data, metric):
         'color': color,
         'diff_percent': ((episode_value - mean_value) / mean_value * 100)
     }
+
+# ============================================
+# ФУНКЦИЯ ДЛЯ КРИВОЙ ЖИЗНИ
+# ============================================
+def get_life_curve(episode_data, release_date):
+    """
+    Строит кумулятивную кривую жизни выпуска
+    Возвращает: dataframe с днями от релиза и накопленными стримами
+    """
+    # Сортируем по дате
+    episode_data = episode_data.sort_values('Дата прослушивания')
+    
+    # Добавляем колонку "День от релиза"
+    episode_data['День от релиза'] = (episode_data['Дата прослушивания'] - release_date).dt.days + 1
+    
+    # Группируем по дням
+    daily = episode_data.groupby('День от релиза').agg({
+        'Стримы': 'sum',
+        'Старты': 'sum'
+    }).reset_index()
+    
+    # Кумулятивная сумма стримов
+    daily['Стримы_накоп'] = daily['Стримы'].cumsum()
+    daily['Старты_накоп'] = daily['Старты'].cumsum()
+    
+    # Нормируем на 100% (от общего числа стримов за весь период)
+    total_streams = daily['Стримы'].sum()
+    if total_streams > 0:
+        daily['Стримы_норм'] = (daily['Стримы_накоп'] / total_streams * 100).round(1)
+    else:
+        daily['Стримы_норм'] = 0
+    
+    return daily
+
+def get_life_curve_for_period(episode_name, df_merged, period_days=None):
+    """
+    Возвращает кривую жизни для выпуска за указанный период
+    period_days: None (все время) или число дней
+    """
+    # Данные по выпуску
+    episode_data = df_merged[df_merged['Выпуск'] == episode_name].copy()
+    
+    if episode_data.empty:
+        return None
+    
+    # Релизная дата
+    release_date = episode_data['Дата прослушивания'].min()
+    
+    # Фильтруем по периоду (если нужно)
+    if period_days is not None:
+        episode_data = episode_data[
+            episode_data['Дата прослушивания'] <= release_date + pd.Timedelta(days=period_days - 1)
+        ]
+    
+    return get_life_curve(episode_data, release_date)
 
 # ============================================
 # ФОРМИРОВАНИЕ ХРОНОЛОГИЧЕСКОГО СПИСКА ВЫПУСКОВ
@@ -863,35 +939,6 @@ if page == "📊 Общая аналитика":
     </div>
     """, unsafe_allow_html=True)
 
-    # Добавляем глобальный CSS для стилизации заголовка expander
-    st.markdown("""
-    <style>
-        /* Стилизуем заголовок expander */
-        div[data-testid="stExpander"] details summary p {
-            color: #f093fb !important;
-            font-size: 1.2rem !important;
-            font-weight: bold !important;
-            text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
-        }
-        
-        /* Принудительно делаем весь текст в expander белым */
-        div[data-testid="stExpander"] * {
-            color: #ffffff !important;
-        }
-        
-        /* Заголовки остаются розовыми */
-        div[data-testid="stExpander"] strong {
-            color: #f093fb !important;
-            text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
-        }
-        
-        /* Стрелочка expander тоже розовая */
-        div[data-testid="stExpander"] details summary svg {
-            fill: #f093fb !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
     with st.expander("ℹ️ Информация о данных", expanded=False):
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -981,13 +1028,12 @@ if page == "📊 Общая аналитика":
 elif page == "📋 Анализ выпуска":
     st.markdown('<div class="page-title">📋 Детальный анализ выпуска</div>', unsafe_allow_html=True)
     
-
     period = st.radio(
-    "📅 Выберите период анализа:",
-    ["1 день", "1 неделя", "1 месяц", "Всё время"],
-    horizontal=True,
-    index=3,
-    key="analysis_period"
+        "📅 Выберите период анализа:",
+        ["1 день", "1 неделя", "1 месяц", "Всё время"],
+        horizontal=True,
+        index=3,
+        key="analysis_period"
     )
     
     # Используем хронологический порядок из справочника
@@ -1208,6 +1254,181 @@ elif page == "📋 Анализ выпуска":
             )
             st.plotly_chart(fig, use_container_width=True)
 
+            # ============================================
+            # КРИВАЯ ЖИЗНИ ВЫПУСКА
+            # ============================================
+            st.markdown("---")
+            st.markdown('<div class="section-title">📈 Кривая жизни выпуска</div>', unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div style="color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-bottom: 1rem;">
+                Показывает, как накапливаются прослушивания (<strong style="color: #f5576c;">стримы</strong>) 
+                и запуски (<strong style="color: #4facfe;">старты</strong>) с течением времени. 
+                Чем быстрее кривая достигает 100% — тем быстрее выпуск "выдыхается".
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Получаем кривую жизни для всего периода
+            life_curve = get_life_curve_for_period(selected_episode, df_merged, period_days=None)
+            
+            if life_curve is not None and not life_curve.empty:
+                # Строим график
+                fig_life = go.Figure()
+                
+                # Кривая стримов (нормированная)
+                fig_life.add_trace(go.Scatter(
+                    x=life_curve['День от релиза'],
+                    y=life_curve['Стримы_норм'],
+                    name='Стримы (накоплено)',
+                    line=dict(color='#f5576c', width=4),
+                    mode='lines+markers',
+                    marker=dict(size=8, color='white', line=dict(color='#f5576c', width=2)),
+                    fill='tozeroy',
+                    fillcolor='rgba(245, 87, 108, 0.15)',
+                    hovertemplate='День %{x}: %{y:.1f}%<extra></extra>'
+                ))
+                
+                # Добавляем вторую ось для абсолютных значений (опционально)
+                fig_life.add_trace(go.Scatter(
+                    x=life_curve['День от релиза'],
+                    y=life_curve['Стримы_накоп'],
+                    name='Стримы (абс.)',
+                    line=dict(color='#f093fb', width=2, dash='dash'),
+                    mode='lines',
+                    yaxis='y2',
+                    hovertemplate='День %{x}: %{y:,.0f} стримов<extra></extra>'
+                ))
+                
+                # Настройка графика с двумя осями
+                fig_life.update_layout(
+                    template='plotly_dark',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    height=450,
+                    hovermode='x unified',
+                    legend=dict(
+                        orientation='h', 
+                        yanchor='bottom', 
+                        y=1.02, 
+                        xanchor='right', 
+                        x=1, 
+                        font=dict(color='white', size=12)
+                    ),
+                    xaxis=dict(
+                        title='День от релиза', 
+                        titlefont=dict(color='white', size=13), 
+                        tickfont=dict(color='white', size=11),
+                        gridcolor='rgba(255,255,255,0.05)',
+                        range=[0, life_curve['День от релиза'].max() + 2]
+                    ),
+                    yaxis=dict(
+                        title='% от всех стримов', 
+                        titlefont=dict(color='#f5576c', size=13), 
+                        tickfont=dict(color='white', size=11),
+                        gridcolor='rgba(255,255,255,0.05)',
+                        range=[0, 105]
+                    ),
+                    yaxis2=dict(
+                        title='Стримы (абс.)',
+                        titlefont=dict(color='#f093fb', size=13),
+                        tickfont=dict(color='white', size=11),
+                        overlaying='y',
+                        side='right',
+                        showgrid=False
+                    )
+                )
+                
+                # Добавляем аннотацию: когда достигнут 50% и 90%
+                try:
+                    # 50%
+                    idx_50 = (life_curve['Стримы_норм'] >= 50).idxmax() if (life_curve['Стримы_норм'] >= 50).any() else None
+                    if idx_50 is not None:
+                        day_50 = life_curve.loc[idx_50, 'День от релиза']
+                        fig_life.add_annotation(
+                            x=day_50,
+                            y=50,
+                            text=f"⚡ 50% на день {int(day_50)}",
+                            showarrow=True,
+                            arrowhead=2,
+                            ax=20,
+                            ay=-30,
+                            font=dict(color='#f6d365', size=11),
+                            arrowcolor='#f6d365'
+                        )
+                    
+                    # 90%
+                    idx_90 = (life_curve['Стримы_норм'] >= 90).idxmax() if (life_curve['Стримы_норм'] >= 90).any() else None
+                    if idx_90 is not None:
+                        day_90 = life_curve.loc[idx_90, 'День от релиза']
+                        fig_life.add_annotation(
+                            x=day_90,
+                            y=90,
+                            text=f"🎯 90% на день {int(day_90)}",
+                            showarrow=True,
+                            arrowhead=2,
+                            ax=20,
+                            ay=30,
+                            font=dict(color='#43e97b', size=11),
+                            arrowcolor='#43e97b'
+                        )
+                except:
+                    pass
+                
+                st.plotly_chart(fig_life, use_container_width=True)
+                
+                # Дополнительная статистика под графиком
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    days_to_50 = life_curve[life_curve['Стримы_норм'] >= 50]['День от релиза'].min() if (life_curve['Стримы_норм'] >= 50).any() else '∞'
+                    st.metric(
+                        label="⏱️ Дней до 50% стримов",
+                        value=f"{days_to_50}" if days_to_50 != '∞' else "—",
+                        help="За сколько дней выпуск набирает половину всех прослушиваний"
+                    )
+                
+                with col2:
+                    days_to_90 = life_curve[life_curve['Стримы_норм'] >= 90]['День от релиза'].min() if (life_curve['Стримы_норм'] >= 90).any() else '∞'
+                    st.metric(
+                        label="⏱️ Дней до 90% стримов",
+                        value=f"{days_to_90}" if days_to_90 != '∞' else "—",
+                        help="За сколько дней выпуск набирает почти все прослушивания"
+                    )
+                
+                with col3:
+                    # Простое правило: если 90% достигается за <7 дней — "быстрый", >30 — "долгий"
+                    if days_to_90 != '∞':
+                        if days_to_90 <= 7:
+                            status = "⚡ Молниеносный (быстро выдыхается)"
+                            color = "#f5576c"
+                        elif days_to_90 <= 14:
+                            status = "📈 Средний (живет ~2 недели)"
+                            color = "#f6d365"
+                        elif days_to_90 <= 30:
+                            status = "🐢 Долгий (живет месяц)"
+                            color = "#43e97b"
+                        else:
+                            status = "🌿 Вечнозеленый (живет > месяца!)"
+                            color = "#4facfe"
+                    else:
+                        status = "📊 Данных недостаточно"
+                        color = "gray"
+                    
+                    st.markdown(f"""
+                    <div style="background: rgba(255,255,255,0.05); 
+                                border-radius: 10px; 
+                                padding: 0.8rem; 
+                                border: 1px solid {color};
+                                text-align: center;">
+                        <div style="color: {color}; font-size: 1.2rem; font-weight: 600;">
+                            {status}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+            else:
+                st.warning("⚠️ Недостаточно данных для построения кривой жизни.")
+
 
 # ============================================
 # СТРАНИЦА 3: СРАВНЕНИЕ ВЫПУСКОВ
@@ -1216,11 +1437,11 @@ else:
     st.markdown('<div class="page-title">🔄 Сравнение двух выпусков</div>', unsafe_allow_html=True)
     
     period = st.radio(
-    "📅 Выберите период анализа:",
-    ["1 день", "1 неделя", "1 месяц", "Всё время"],
-    horizontal=True,
-    index=3,
-    key="analysis_period"
+        "📅 Выберите период анализа:",
+        ["1 день", "1 неделя", "1 месяц", "Всё время"],
+        horizontal=True,
+        index=3,
+        key="comparison_period"
     )
     
     col1, col2 = st.columns(2)
@@ -1480,11 +1701,247 @@ else:
             )
             
             st.plotly_chart(fig_streams, use_container_width=True)
-            
-            # Итоговый вердикт
+
+            # ============================================
+            # СРАВНЕНИЕ КРИВЫХ ЖИЗНИ ДВУХ ВЫПУСКОВ
+            # ============================================
             st.markdown("---")
+            st.markdown('<div class="section-title">📈 Сравнение кривых жизни</div>', unsafe_allow_html=True)
             
-            st.markdown('<div class="section-title">🏆 Итоговый вердикт</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div style="color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-bottom: 1rem;">
+                Сравнение того, как быстро набирают прослушивания два выпуска. 
+                Чей график <strong style="color: #43e97b;">круче</strong> — тот быстрее "взлетает". 
+                Чей график <strong style="color: #4facfe;">длиннее</strong> — тот живет дольше.
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Получаем кривые жизни для обоих выпусков
+            life_curve1 = get_life_curve_for_period(ep1, df_merged, period_days=None)
+            life_curve2 = get_life_curve_for_period(ep2, df_merged, period_days=None)
+            
+            if life_curve1 is not None and life_curve2 is not None and not life_curve1.empty and not life_curve2.empty:
+                # Строим сравнительный график
+                fig_compare_life = go.Figure()
+                
+                # Выпуск 1
+                fig_compare_life.add_trace(go.Scatter(
+                    x=life_curve1['День от релиза'],
+                    y=life_curve1['Стримы_норм'],
+                    name=f'{ep1_short}',
+                    line=dict(color='#4facfe', width=4),
+                    mode='lines+markers',
+                    marker=dict(size=8, color='white', line=dict(color='#4facfe', width=2)),
+                    fill='tozeroy',
+                    fillcolor='rgba(79, 172, 254, 0.15)',
+                    hovertemplate='%{x:.0f} день: %{y:.1f}%<extra>%{fullData.name}</extra>'
+                ))
+                
+                # Выпуск 2
+                fig_compare_life.add_trace(go.Scatter(
+                    x=life_curve2['День от релиза'],
+                    y=life_curve2['Стримы_норм'],
+                    name=f'{ep2_short}',
+                    line=dict(color='#f5576c', width=4),
+                    mode='lines+markers',
+                    marker=dict(size=8, color='white', line=dict(color='#f5576c', width=2)),
+                    fill='tozeroy',
+                    fillcolor='rgba(245, 87, 108, 0.15)',
+                    hovertemplate='%{x:.0f} день: %{y:.1f}%<extra>%{fullData.name}</extra>'
+                ))
+                
+                # Добавляем линии 50% и 90%
+                for y_val, color, label in [(50, '#f6d365', '50%'), (90, '#43e97b', '90%')]:
+                    fig_compare_life.add_hline(
+                        y=y_val, 
+                        line_dash="dash", 
+                        line_color=color, 
+                        line_width=1.5,
+                        annotation_text=label,
+                        annotation_font=dict(color=color, size=10)
+                    )
+                
+                fig_compare_life.update_layout(
+                    template='plotly_dark',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    height=450,
+                    hovermode='x unified',
+                    legend=dict(
+                        orientation='h', 
+                        yanchor='bottom', 
+                        y=1.02, 
+                        xanchor='right', 
+                        x=1, 
+                        font=dict(color='white', size=12)
+                    ),
+                    xaxis=dict(
+                        title='День от релиза', 
+                        titlefont=dict(color='white', size=13), 
+                        tickfont=dict(color='white', size=11),
+                        gridcolor='rgba(255,255,255,0.05)',
+                        range=[0, max(life_curve1['День от релиза'].max(), life_curve2['День от релиза'].max()) + 2]
+                    ),
+                    yaxis=dict(
+                        title='% от всех стримов', 
+                        titlefont=dict(color='white', size=13), 
+                        tickfont=dict(color='white', size=11),
+                        gridcolor='rgba(255,255,255,0.05)',
+                        range=[0, 105]
+                    )
+                )
+                
+                st.plotly_chart(fig_compare_life, use_container_width=True)
+                
+                # Сравнительная статистика
+                st.markdown("---")
+                st.markdown('<div class="section-title">📊 Сравнительная статистика</div>', unsafe_allow_html=True)
+                
+                # Считаем метрики для сравнения
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    # Дней до 50%
+                    days1_50 = life_curve1[life_curve1['Стримы_норм'] >= 50]['День от релиза'].min() if (life_curve1['Стримы_норм'] >= 50).any() else None
+                    days2_50 = life_curve2[life_curve2['Стримы_норм'] >= 50]['День от релиза'].min() if (life_curve2['Стримы_норм'] >= 50).any() else None
+                    
+                    if days1_50 and days2_50:
+                        faster = "1️⃣" if days1_50 < days2_50 else "2️⃣" if days2_50 < days1_50 else "🤝"
+                        st.markdown(f"""
+                        <div class="verdict-card" style="border-color: #4facfe;">
+                            <strong style="color: #4facfe !important;">⏱️ Дней до 50% {faster}</strong><br>
+                            <span style="font-size: 1rem; color: rgba(255,255,255,0.9);">
+                                {ep1_short}: <strong style="color: #4facfe;">{days1_50} дн.</strong><br>
+                                {ep2_short}: <strong style="color: #f5576c;">{days2_50} дн.</strong>
+                            </span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"""
+                        <div class="verdict-card" style="border-color: #4facfe;">
+                            <strong style="color: #4facfe !important;">⏱️ Дней до 50%</strong><br>
+                            <span style="color: rgba(255,255,255,0.5);">—</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                
+                with col2:
+                    # Дней до 90%
+                    days1_90 = life_curve1[life_curve1['Стримы_норм'] >= 90]['День от релиза'].min() if (life_curve1['Стримы_норм'] >= 90).any() else None
+                    days2_90 = life_curve2[life_curve2['Стримы_норм'] >= 90]['День от релиза'].min() if (life_curve2['Стримы_норм'] >= 90).any() else None
+                    
+                    if days1_90 and days2_90:
+                        longer = "1️⃣" if days1_90 > days2_90 else "2️⃣" if days2_90 > days1_90 else "🤝"
+                        st.markdown(f"""
+                        <div class="verdict-card" style="border-color: #43e97b;">
+                            <strong style="color: #43e97b !important;">⏱️ Дней до 90% {longer}</strong><br>
+                            <span style="font-size: 1rem; color: rgba(255,255,255,0.9);">
+                                {ep1_short}: <strong style="color: #4facfe;">{days1_90} дн.</strong><br>
+                                {ep2_short}: <strong style="color: #f5576c;">{days2_90} дн.</strong>
+                            </span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"""
+                        <div class="verdict-card" style="border-color: #43e97b;">
+                            <strong style="color: #43e97b !important;">⏱️ Дней до 90%</strong><br>
+                            <span style="color: rgba(255,255,255,0.5);">—</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                
+                with col3:
+                    # Скорость "взлета" (крутизна на первых 3 днях)
+                    if len(life_curve1) >= 3 and len(life_curve2) >= 3:
+                        slope1 = (life_curve1['Стримы_норм'].iloc[2] - life_curve1['Стримы_норм'].iloc[0]) / 2
+                        slope2 = (life_curve2['Стримы_норм'].iloc[2] - life_curve2['Стримы_норм'].iloc[0]) / 2
+                        faster_start = "1️⃣" if slope1 > slope2 else "2️⃣" if slope2 > slope1 else "🤝"
+                        st.markdown(f"""
+                        <div class="verdict-card" style="border-color: #f6d365;">
+                            <strong style="color: #f6d365 !important;">🚀 Скорость старта {faster_start}</strong><br>
+                            <span style="font-size: 1rem; color: rgba(255,255,255,0.9);">
+                                {ep1_short}: <strong style="color: #4facfe;">{slope1:.1f}%/день</strong><br>
+                                {ep2_short}: <strong style="color: #f5576c;">{slope2:.1f}%/день</strong>
+                            </span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"""
+                        <div class="verdict-card" style="border-color: #f6d365;">
+                            <strong style="color: #f6d365 !important;">🚀 Скорость старта</strong><br>
+                            <span style="color: rgba(255,255,255,0.5);">—</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                
+                # Краткий вердикт по кривым жизни
+                st.markdown("---")
+                st.markdown('<div class="section-title">💡 Вывод</div>', unsafe_allow_html=True)
+                
+                col1, col2, col3 = st.columns([1, 1, 2])
+                
+                with col1:
+                    st.markdown(f"""
+                    <div class="verdict-card">
+                        <strong>⭐ {ep1_short}</strong><br>
+                        <span>Скорость: {slope1 if len(life_curve1) >= 3 else 'N/A'}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with col2:
+                    st.markdown(f"""
+                    <div class="verdict-card">
+                        <strong>⭐ {ep2_short}</strong><br>
+                        <span>Скорость: {slope2 if len(life_curve2) >= 3 else 'N/A'}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with col3:
+                    if len(life_curve1) >= 3 and len(life_curve2) >= 3:
+                        if days1_50 and days2_50 and days1_90 and days2_90:
+                            if days1_50 < days2_50 and days1_90 < days2_90:
+                                winner = ep1_short
+                                color = "#43e97b"
+                                detail = "быстрее набирает аудиторию, но и быстрее \"выдыхается\""
+                            elif days1_50 > days2_50 and days1_90 > days2_90:
+                                winner = ep2_short
+                                color = "#43e97b"
+                                detail = "быстрее набирает аудиторию, но и быстрее \"выдыхается\""
+                            elif days1_50 < days2_50 and days1_90 > days2_90:
+                                winner = ep1_short
+                                color = "#f6d365"
+                                detail = "взлетает быстрее, но живет дольше. Это идеальный сценарий!"
+                            elif days1_50 > days2_50 and days1_90 < days2_90:
+                                winner = ep2_short
+                                color = "#f6d365"
+                                detail = "взлетает быстрее, но живет дольше. Это идеальный сценарий!"
+                            else:
+                                winner = "Ничья"
+                                color = "#4facfe"
+                                detail = "у выпусков разные паттерны. Посмотрите на график выше"
+                            
+                            st.markdown(f"""
+                            <div class="verdict-card" style="border-color: {color};">
+                                <strong style="color: {color} !important;">🏆 Победитель</strong><br>
+                                <span style="color: {color} !important;">{winner}</span><br>
+                                <span>{detail}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        else:
+                            st.markdown(f"""
+                            <div class="verdict-card" style="border-color: #f6d365;">
+                                <strong style="color: #f6d365 !important;">📊</strong><br>
+                                <span>Недостаточно данных для сравнения</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"""
+                        <div class="verdict-card" style="border-color: #f6d365;">
+                            <strong style="color: #f6d365 !important;">📊</strong><br>
+                            <span>Недостаточно данных для сравнения</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+            
+            # Итоговый вердикт по RSI
+            st.markdown("---")
+            st.markdown('<div class="section-title">🏆 Итоговый вердикт по RSI</div>', unsafe_allow_html=True)
             
             col1, col2, col3 = st.columns([1, 1, 2])
             
