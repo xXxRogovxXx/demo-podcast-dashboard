@@ -348,13 +348,12 @@ st.markdown("""
         font-weight: bold;
     }
 
-        /* Стили для label radio button */
-    div[data-testid="stRadio"] > label {
+     /* Стили для label radio button */
+    div[data-testid="stRadio"] > label > p {
         color: #ffffff !important;
         font-size: 1.2rem !important;
         font-weight: 700 !important;
         text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
-        margin-bottom: 0.5rem !important;
     }
     
 </style>
