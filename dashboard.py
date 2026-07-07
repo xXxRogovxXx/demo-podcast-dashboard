@@ -367,6 +367,13 @@ st.markdown("""
         font-weight: 600 !important;
         text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
     }
+        /* Белый цвет для radio button labels */
+    div[class*="st-c5 st-cj st-ck"] {
+        color: #ffffff !important;
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
+    }
     
 </style>
 """, unsafe_allow_html=True)
