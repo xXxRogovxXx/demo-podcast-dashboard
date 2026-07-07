@@ -349,8 +349,8 @@ st.markdown("""
     }
 
     
-        /* Белый цвет для radio button labels */
-    div[class*="st-c5 st-cj st-ck"] {
+    /* Белый цвет ТОЛЬКО для radio с периодами */
+    div[data-testid="stHorizontalRadio"] label div[class*="st-c5 st-cj st-ck"] {
         color: #ffffff !important;
         font-size: 1.15rem !important;
         font-weight: 700 !important;
