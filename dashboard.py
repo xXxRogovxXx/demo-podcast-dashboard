@@ -234,6 +234,80 @@ st.markdown("""
         font-weight: 600;
         color: white;
     }
+    
+    /* Стили для заголовков страниц анализа */
+    .page-title {
+        color: #ffffff !important;
+        font-size: 2rem !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 30px rgba(240, 147, 251, 0.5) !important;
+        letter-spacing: 1px !important;
+    }
+    
+    .period-label {
+        color: #ffffff !important;
+        font-size: 1.3rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.5rem !important;
+        text-shadow: 0 0 20px rgba(79, 172, 254, 0.4) !important;
+    }
+    
+    /* Стили для radio buttons */
+    div[role="radiogroup"] label {
+        color: #ffffff !important;
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+    }
+    
+    div[role="radiogroup"] label:hover {
+        color: #f093fb !important;
+    }
+    
+    /* Стили для заголовков сравнения */
+    .comparison-header {
+        color: #ffffff !important;
+        font-size: 1.8rem !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 30px rgba(245, 87, 108, 0.4) !important;
+    }
+    
+    .verdict-label {
+        color: #ffffff !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        text-shadow: 0 0 15px rgba(240, 147, 251, 0.3) !important;
+    }
+    
+    /* Яркий текст в информационном блоке */
+    .info-block .info-title {
+        color: #ffffff !important;
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 20px rgba(79, 172, 254, 0.5) !important;
+    }
+    
+    .info-block div {
+        color: #e0e0ff !important;
+        font-weight: 500 !important;
+    }
+    
+    .info-block strong {
+        color: #f093fb !important;
+        font-weight: 700 !important;
+    }
+    
+    /* Яркий цвет для st.metric */
+    div[data-testid="stMetric"] label {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        text-shadow: 0 0 10px rgba(240, 147, 251, 0.4) !important;
+    }
+    
+    div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
+        color: #f093fb !important;
+        font-weight: 700 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -726,35 +800,35 @@ if page == "📊 Общая аналитика":
         col1, col2, col3 = st.columns(3)
         with col1:
             st.markdown(f"""
-            <div style="color: rgba(255,255,255,0.9); font-size: 1rem;">
-                <strong style="color: white; font-size: 1.05rem;">📅 Период</strong><br>
-                {filtered_data['Дата прослушивания'].min().date()} — {filtered_data['Дата прослушивания'].max().date()}
+            <div style="color: #e0e0ff !important; font-size: 1rem; font-weight: 500;">
+                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📅 Период</strong><br>
+                <span style="color: #ffffff !important;">{filtered_data['Дата прослушивания'].min().date()} — {filtered_data['Дата прослушивания'].max().date()}</span>
             </div>
-            <div style="color: rgba(255,255,255,0.9); font-size: 1rem; margin-top: 0.8rem;">
-                <strong style="color: white; font-size: 1.05rem;">📊 Всего записей</strong><br>
-                {len(filtered_data):,}
+            <div style="color: #e0e0ff !important; font-size: 1rem; margin-top: 0.8rem; font-weight: 500;">
+                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📊 Всего записей</strong><br>
+                <span style="color: #ffffff !important;">{len(filtered_data):,}</span>
             </div>
             """, unsafe_allow_html=True)
         with col2:
             st.markdown(f"""
-            <div style="color: rgba(255,255,255,0.9); font-size: 1rem;">
-                <strong style="color: white; font-size: 1.05rem;">📝 Уникальных выпусков</strong><br>
-                {filtered_data['Выпуск'].nunique()}
+            <div style="color: #e0e0ff !important; font-size: 1rem; font-weight: 500;">
+                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📝 Уникальных выпусков</strong><br>
+                <span style="color: #ffffff !important;">{filtered_data['Выпуск'].nunique()}</span>
             </div>
-            <div style="color: rgba(255,255,255,0.9); font-size: 1rem; margin-top: 0.8rem;">
-                <strong style="color: white; font-size: 1.05rem;">🎭 Жанры</strong><br>
-                {', '.join(filtered_data['Жанр'].unique())}
+            <div style="color: #e0e0ff !important; font-size: 1rem; margin-top: 0.8rem; font-weight: 500;">
+                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">🎭 Жанры</strong><br>
+                <span style="color: #ffffff !important;">{', '.join(filtered_data['Жанр'].unique())}</span>
             </div>
             """, unsafe_allow_html=True)
         with col3:
             st.markdown(f"""
-            <div style="color: rgba(255,255,255,0.9); font-size: 1rem;">
-                <strong style="color: white; font-size: 1.05rem;">📂 Форматы</strong><br>
-                {', '.join(filtered_data['Формат'].unique())}
+            <div style="color: #e0e0ff !important; font-size: 1rem; font-weight: 500;">
+                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📂 Форматы</strong><br>
+                <span style="color: #ffffff !important;">{', '.join(filtered_data['Формат'].unique())}</span>
             </div>
-            <div style="color: rgba(255,255,255,0.9); font-size: 1rem; margin-top: 0.8rem;">
-                <strong style="color: white; font-size: 1.05rem;">⭐ Средний RSI</strong><br>
-                {episode_summary['RSI'].mean():.1f}
+            <div style="color: #e0e0ff !important; font-size: 1rem; margin-top: 0.8rem; font-weight: 500;">
+                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">⭐ Средний RSI</strong><br>
+                <span style="color: #ffffff !important;">{episode_summary['RSI'].mean():.1f}</span>
             </div>
             """, unsafe_allow_html=True)
 
@@ -763,9 +837,9 @@ if page == "📊 Общая аналитика":
 # СТРАНИЦА 2: АНАЛИЗ ВЫПУСКА
 # ============================================
 elif page == "📋 Анализ выпуска":
-    st.title("📋 Детальный анализ выпуска")
+    st.markdown('<div class="page-title">📋 Детальный анализ выпуска</div>', unsafe_allow_html=True)
     
-    st.markdown("### 📅 Период")
+    st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
     period = st.radio(
         "",
         ["1 день", "1 неделя", "1 месяц", "Всё время"],
@@ -901,7 +975,7 @@ elif page == "📋 Анализ выпуска":
             
             st.markdown("---")
             
-            st.subheader("📊 Сравнение со средними показателями")
+            st.markdown('<div class="section-title">📊 Сравнение со средними показателями</div>', unsafe_allow_html=True)
             
             compare_data = df_merged.copy()
             if period == "1 день":
@@ -933,7 +1007,7 @@ elif page == "📋 Анализ выпуска":
                 })
             st.dataframe(pd.DataFrame(comparison_data), use_container_width=True)
             
-            st.subheader("📈 Динамика прослушиваний")
+            st.markdown('<div class="section-title">📈 Динамика прослушиваний</div>', unsafe_allow_html=True)
             daily_data = episode_data.groupby('Дата прослушивания').agg({
                 'Старты': 'sum',
                 'Стримы': 'sum'
@@ -992,9 +1066,9 @@ elif page == "📋 Анализ выпуска":
 # СТРАНИЦА 3: СРАВНЕНИЕ ВЫПУСКОВ
 # ============================================
 else:
-    st.title("🔄 Сравнение двух выпусков")
+    st.markdown('<div class="page-title">🔄 Сравнение двух выпусков</div>', unsafe_allow_html=True)
     
-    st.markdown("### 📅 Период")
+    st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
     period = st.radio(
         "",
         ["1 день", "1 неделя", "1 месяц", "Всё время"],
