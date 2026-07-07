@@ -962,7 +962,7 @@ if page == "📊 Общая аналитика":
 elif page == "📋 Анализ выпуска":
     st.markdown('<div class="page-title">📋 Детальный анализ выпуска</div>', unsafe_allow_html=True)
     
-        st.markdown('<p style="color: #ffffff !important; font-size: 1.2rem !important; font-weight: 700 !important; text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important; margin-bottom: 0.5rem;">📅 Выберите период анализа:</p>', unsafe_allow_html=True)
+    st.markdown('<p style="color: #ffffff !important; font-size: 1.2rem !important; font-weight: 700 !important; text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important; margin-bottom: 0.5rem;">📅 Выберите период анализа:</p>', unsafe_allow_html=True)
     period = st.radio(
         "",
         ["1 день", "1 неделя", "1 месяц", "Всё время"],
