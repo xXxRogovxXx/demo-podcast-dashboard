@@ -934,14 +934,6 @@ elif page == "📋 Анализ выпуска":
         index=3
     )
     
-    st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
-    period = st.radio(
-        "",
-        ["1 день", "1 неделя", "1 месяц", "Всё время"],
-        horizontal=True,
-        index=3
-    )
-    
     # Используем хронологический порядок из справочника
     selected_short = st.selectbox("🎯 Выберите выпуск:", short_names_ordered)
     selected_episode = episode_names_ordered[selected_short]
@@ -1174,14 +1166,6 @@ else:
         }
     </style>
     """, unsafe_allow_html=True)
-    
-    st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
-    period = st.radio(
-        "",
-        ["1 день", "1 неделя", "1 месяц", "Всё время"],
-        horizontal=True,
-        index=3
-    )
     
     st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
     period = st.radio(
