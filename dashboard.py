@@ -906,7 +906,7 @@ with st.expander("ℹ️ Информация о данных", expanded=False):
                 {episode_summary['RSI'].mean():.1f}
             </span>
         </div>
-        """, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 
 # ============================================
