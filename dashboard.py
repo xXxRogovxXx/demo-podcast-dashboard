@@ -797,39 +797,39 @@ if page == "📊 Общая аналитика":
     """, unsafe_allow_html=True)
 
     with st.expander("ℹ️ Информация о данных", expanded=False):
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown(f"""
-        <div style="color: #ffffff !important; font-size: 1rem; font-weight: 500 !important;">
-            <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📅 Период</strong><br>
-            <span style="color: #ffffff !important;">{filtered_data['Дата прослушивания'].min().date()} — {filtered_data['Дата прослушивания'].max().date()}</span>
-        </div>
-        <div style="color: #ffffff !important; font-size: 1rem; margin-top: 0.8rem; font-weight: 500 !important;">
-            <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📊 Всего записей</strong><br>
-            <span style="color: #ffffff !important;">{len(filtered_data):,}</span>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown(f"""
-        <div style="color: #ffffff !important; font-size: 1rem; font-weight: 500 !important;">
-            <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📝 Уникальных выпусков</strong><br>
-            <span style="color: #ffffff !important;">{filtered_data['Выпуск'].nunique()}</span>
-        </div>
-        <div style="color: #ffffff !important; font-size: 1rem; margin-top: 0.8rem; font-weight: 500 !important;">
-            <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">🎭 Жанры</strong><br>
-            <span style="color: #ffffff !important;">{', '.join(filtered_data['Жанр'].unique())}</span>
-        </div>
-        """, unsafe_allow_html=True)
-    with col3:
-        st.markdown(f"""
-        <div style="color: #ffffff !important; font-size: 1rem; font-weight: 500 !important;">
-            <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📂 Форматы</strong><br>
-            <span style="color: #ffffff !important;">{', '.join(filtered_data['Формат'].unique())}</span>
-        </div>
-        <div style="color: #ffffff !important; font-size: 1rem; margin-top: 0.8rem; font-weight: 500 !important;">
-            <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">⭐ Средний RSI</strong><br>
-            <span style="color: #ffffff !important;">{episode_summary['RSI'].mean():.1f}</span>
-        </div>
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown(f"""
+            <div style="color: #ffffff !important; font-size: 1rem; font-weight: 500 !important;">
+                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📅 Период</strong><br>
+                <span style="color: #ffffff !important;">{filtered_data['Дата прослушивания'].min().date()} — {filtered_data['Дата прослушивания'].max().date()}</span>
+            </div>
+            <div style="color: #ffffff !important; font-size: 1rem; margin-top: 0.8rem; font-weight: 500 !important;">
+                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📊 Всего записей</strong><br>
+                <span style="color: #ffffff !important;">{len(filtered_data):,}</span>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"""
+            <div style="color: #ffffff !important; font-size: 1rem; font-weight: 500 !important;">
+                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📝 Уникальных выпусков</strong><br>
+                <span style="color: #ffffff !important;">{filtered_data['Выпуск'].nunique()}</span>
+            </div>
+            <div style="color: #ffffff !important; font-size: 1rem; margin-top: 0.8rem; font-weight: 500 !important;">
+                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">🎭 Жанры</strong><br>
+                <span style="color: #ffffff !important;">{', '.join(filtered_data['Жанр'].unique())}</span>
+            </div>
+            """, unsafe_allow_html=True)
+        with col3:
+            st.markdown(f"""
+            <div style="color: #ffffff !important; font-size: 1rem; font-weight: 500 !important;">
+                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">📂 Форматы</strong><br>
+                <span style="color: #ffffff !important;">{', '.join(filtered_data['Формат'].unique())}</span>
+            </div>
+            <div style="color: #ffffff !important; font-size: 1rem; margin-top: 0.8rem; font-weight: 500 !important;">
+                <strong style="color: #f093fb !important; font-size: 1.05rem; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5);">⭐ Средний RSI</strong><br>
+                <span style="color: #ffffff !important;">{episode_summary['RSI'].mean():.1f}</span>
+            </div>
         """, unsafe_allow_html=True)
 
 
