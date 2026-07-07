@@ -348,7 +348,25 @@ st.markdown("""
         font-weight: bold;
     }
 
+    /* Принудительно белый цвет для ВСЕХ label у radio */
+    .stRadio label {
+        color: #ffffff !important;
+    }
     
+    .stRadio label p {
+        color: #ffffff !important;
+        font-size: 1.15rem !important;
+        font-weight: 600 !important;
+        text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
+    }
+    
+    /* Переопределение для всех параграфов внутри radio */
+    div[class*="stRadio"] p {
+        color: #ffffff !important;
+        font-size: 1.15rem !important;
+        font-weight: 600 !important;
+        text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
+    }
         /* Белый цвет для radio button labels */
     div[class*="st-c5 st-cj st-ck"] {
         color: #ffffff !important;
