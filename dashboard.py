@@ -962,9 +962,9 @@ if page == "📊 Общая аналитика":
 elif page == "📋 Анализ выпуска":
     st.markdown('<div class="page-title">📋 Детальный анализ выпуска</div>', unsafe_allow_html=True)
     
-    st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
+        st.markdown('<p style="color: #ffffff !important; font-size: 1.2rem !important; font-weight: 700 !important; text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important; margin-bottom: 0.5rem;">📅 Выберите период анализа:</p>', unsafe_allow_html=True)
     period = st.radio(
-        "📅 Выберите период анализа:",
+        "",
         ["1 день", "1 неделя", "1 месяц", "Всё время"],
         horizontal=True,
         index=3,
@@ -1196,13 +1196,13 @@ elif page == "📋 Анализ выпуска":
 else:
     st.markdown('<div class="page-title">🔄 Сравнение двух выпусков</div>', unsafe_allow_html=True)
     
-    st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
+    st.markdown('<p style="color: #ffffff !important; font-size: 1.2rem !important; font-weight: 700 !important; text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important; margin-bottom: 0.5rem;">📅 Выберите период анализа:</p>', unsafe_allow_html=True)
     period = st.radio(
-        "📅 Выберите период для сравнения:",
+        "",
         ["1 день", "1 неделя", "1 месяц", "Всё время"],
         horizontal=True,
         index=3,
-        key="comparison_period"
+        key="analysis_period"
     )
     
     col1, col2 = st.columns(2)
