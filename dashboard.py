@@ -367,7 +367,7 @@ st.markdown("""
         font-weight: 600 !important;
         text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
     }
-        /* Белый цвет для radio button labels */
+    /* Белый цвет для radio button labels */
     div[class*="st-c5 st-cj st-ck"] {
         color: #ffffff !important;
         font-size: 1.15rem !important;
@@ -983,7 +983,7 @@ elif page == "📋 Анализ выпуска":
     
 
     period = st.radio(
-    "📅 Выберите период анализа:",
+    "📅 Период анализа:",
     ["1 день", "1 неделя", "1 месяц", "Всё время"],
     horizontal=True,
     index=3,
@@ -1216,7 +1216,7 @@ else:
     st.markdown('<div class="page-title">🔄 Сравнение двух выпусков</div>', unsafe_allow_html=True)
     
     period = st.radio(
-    "📅 Выберите период анализа:",
+    "📅 Период анализа:",
     ["1 день", "1 неделя", "1 месяц", "Всё время"],
     horizontal=True,
     index=3,
