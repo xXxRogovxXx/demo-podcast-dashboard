@@ -914,58 +914,17 @@ if page == "📊 Общая аналитика":
 elif page == "📋 Анализ выпуска":
     st.markdown('<div class="page-title">📋 Детальный анализ выпуска</div>', unsafe_allow_html=True)
 
-    # РАДИКАЛЬНЫЙ CSS ДЛЯ ВСЕГО ТЕКСТА НА СТРАНИЦЕ
+    # Перед radio button на странице 2 и 3
     st.markdown("""
     <style>
-        /* Принудительно белый текст для всех элементов */
-        div[data-testid="stVerticalBlock"] * {
-            color: #ffffff !important;
-        }
-        
-        /* Заголовки */
-        .page-title, .section-title, .period-label {
-            color: #ffffff !important;
-        }
-        
-        /* Radio buttons */
         div[role="radiogroup"] label p {
             color: #ffffff !important;
             font-weight: 700 !important;
             font-size: 1.1rem !important;
             text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
         }
-        
-        /* Selectbox */
-        div[data-testid="stSelectbox"] label {
-            color: #ffffff !important;
-            font-weight: 600 !important;
-        }
-        
-        /* DataFrame */
-        div[data-testid="stDataFrame"] * {
-            color: #ffffff !important;
-        }
-        
-        /* Все label */
-        label {
-            color: #ffffff !important;
-        }
-        
-        /* Текст в markdown */
-        p, span, div {
-            color: #ffffff !important;
-        }
     </style>
     """, unsafe_allow_html=True)
-    
-    st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
-    period = st.radio(
-        "",
-        ["1 день", "1 неделя", "1 месяц", "Всё время"],
-        horizontal=True,
-        index=3,
-        key="period_page2"
-    )
     
     st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
     period = st.radio(
@@ -1196,55 +1155,14 @@ elif page == "📋 Анализ выпуска":
 else:
     st.markdown('<div class="page-title">🔄 Сравнение двух выпусков</div>', unsafe_allow_html=True)
 
-    # РАДИКАЛЬНЫЙ CSS ДЛЯ ВСЕГО ТЕКСТА НА СТРАНИЦЕ
+        # Перед radio button на странице 2 и 3
     st.markdown("""
     <style>
-        /* Принудительно белый текст для всех элементов */
-        div[data-testid="stVerticalBlock"] * {
-            color: #ffffff !important;
-        }
-        
-        /* Заголовки */
-        .page-title, .section-title, .period-label {
-            color: #ffffff !important;
-        }
-        
-        /* Radio buttons */
         div[role="radiogroup"] label p {
             color: #ffffff !important;
             font-weight: 700 !important;
             font-size: 1.1rem !important;
             text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
-        }
-        
-        /* Selectbox */
-        div[data-testid="stSelectbox"] label {
-            color: #ffffff !important;
-            font-weight: 600 !important;
-        }
-        
-        /* DataFrame */
-        div[data-testid="stDataFrame"] * {
-            color: #ffffff !important;
-        }
-        
-        /* Все label */
-        label {
-            color: #ffffff !important;
-        }
-        
-        /* Текст в markdown */
-        p, span, div {
-            color: #ffffff !important;
-        }
-        
-        /* Вердикт */
-        .verdict-text {
-            color: #ffffff !important;
-            font-size: 1.2rem !important;
-            font-weight: 700 !important;
-            text-shadow: 0 0 25px rgba(79, 172, 254, 0.8) !important;
-            padding: 1rem !important;
         }
     </style>
     """, unsafe_allow_html=True)
