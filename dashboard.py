@@ -308,6 +308,45 @@ st.markdown("""
         color: #f093fb !important;
         font-weight: 700 !important;
     }
+    
+    /* Стили для selectbox на страницах анализа */
+    .stSelectbox label {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        font-size: 1.1rem !important;
+        text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
+    }
+    
+    /* Стили для radio button текста */
+    div[role="radiogroup"] label p {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
+        text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
+    }
+    
+    /* Стили для карточек вердикта */
+    .verdict-card {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #f093fb;
+        color: #ffffff !important;
+        font-size: 1rem;
+        text-align: center;
+    }
+    
+    .verdict-card strong {
+        color: #f093fb !important;
+        font-size: 1.1rem;
+        text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
+    }
+    
+    .verdict-card span {
+        color: #ffffff !important;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -789,7 +828,7 @@ if page == "📊 Общая аналитика":
     except:
         st.dataframe(display_df.head(50), height=400)
 
-        st.markdown("---")
+    st.markdown("---")
     st.markdown("""
     <div class="footer">
         🎙️ Подкаст Аналитика Pro • Премиум дашборд • Данные обновляются автоматически
@@ -913,29 +952,22 @@ if page == "📊 Общая аналитика":
 # ============================================
 elif page == "📋 Анализ выпуска":
     st.markdown('<div class="page-title">📋 Детальный анализ выпуска</div>', unsafe_allow_html=True)
-
-    # Перед radio button на странице 2 и 3
-    st.markdown("""
-    <style>
-        div[role="radiogroup"] label p {
-            color: #ffffff !important;
-            font-weight: 700 !important;
-            font-size: 1.1rem !important;
-            text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
     
     st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
     period = st.radio(
-        "",
+        "Выберите период анализа:",
         ["1 день", "1 неделя", "1 месяц", "Всё время"],
         horizontal=True,
-        index=3
+        index=3,
+        key="analysis_period"
     )
     
     # Используем хронологический порядок из справочника
-    selected_short = st.selectbox("🎯 Выберите выпуск:", short_names_ordered)
+    selected_short = st.selectbox(
+        "🎯 Выберите выпуск:",
+        short_names_ordered,
+        key="analysis_episode"
+    )
     selected_episode = episode_names_ordered[selected_short]
     
     all_data = df_merged[df_merged['Выпуск'] == selected_episode].copy()
@@ -1154,34 +1186,31 @@ elif page == "📋 Анализ выпуска":
 # ============================================
 else:
     st.markdown('<div class="page-title">🔄 Сравнение двух выпусков</div>', unsafe_allow_html=True)
-
-        # Перед radio button на странице 2 и 3
-    st.markdown("""
-    <style>
-        div[role="radiogroup"] label p {
-            color: #ffffff !important;
-            font-weight: 700 !important;
-            font-size: 1.1rem !important;
-            text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
     
     st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
     period = st.radio(
-        "",
+        "Выберите период для сравнения:",
         ["1 день", "1 неделя", "1 месяц", "Всё время"],
         horizontal=True,
-        index=3
+        index=3,
+        key="comparison_period"
     )
     
     col1, col2 = st.columns(2)
     with col1:
-        ep1_short = st.selectbox("📌 Выпуск №1:", short_names_ordered, key="ep1")
+        ep1_short = st.selectbox(
+            "📌 Выпуск №1:",
+            short_names_ordered,
+            key="ep1"
+        )
         ep1 = episode_names_ordered[ep1_short]
         release_date1 = df_total[df_total['Выпуск'] == ep1]['Дата прослушивания'].min()
     with col2:
-        ep2_short = st.selectbox("📌 Выпуск №2:", short_names_ordered, key="ep2")
+        ep2_short = st.selectbox(
+            "📌 Выпуск №2:",
+            short_names_ordered,
+            key="ep2"
+        )
         ep2 = episode_names_ordered[ep2_short]
         release_date2 = df_total[df_total['Выпуск'] == ep2]['Дата прослушивания'].min()
     
@@ -1425,46 +1454,66 @@ else:
             
             st.plotly_chart(fig_streams, use_container_width=True)
             
-                        # Итоговый вердикт
+            # Итоговый вердикт
             st.markdown("---")
-            
-            # CSS для вердикта и radio buttons
-            st.markdown("""
-            <style>
-                /* Радио кнопки */
-                div[role="radiogroup"] label p {
-                    color: #ffffff !important;
-                    font-weight: 700 !important;
-                    font-size: 1.1rem !important;
-                    text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
-                }
-                
-                /* Вердикт */
-                .verdict-text {
-                    color: #ffffff !important;
-                    font-size: 1.2rem !important;
-                    font-weight: 700 !important;
-                    text-shadow: 0 0 25px rgba(79, 172, 254, 0.8) !important;
-                    padding: 1rem !important;
-                }
-            </style>
-            """, unsafe_allow_html=True)
             
             st.markdown('<div class="section-title">🏆 Итоговый вердикт</div>', unsafe_allow_html=True)
             
             col1, col2, col3 = st.columns([1, 1, 2])
+            
             with col1:
-                st.metric(f"⭐ RSI {ep1_short}", f"{rsi1:.1f}")
+                st.markdown(f"""
+                <div class="verdict-card">
+                    <strong>⭐ RSI {ep1_short}</strong><br>
+                    <span>{rsi1:.1f}</span>
+                </div>
+                """, unsafe_allow_html=True)
+            
             with col2:
-                st.metric(f"⭐ RSI {ep2_short}", f"{rsi2:.1f}")
+                st.markdown(f"""
+                <div class="verdict-card">
+                    <strong>⭐ RSI {ep2_short}</strong><br>
+                    <span>{rsi2:.1f}</span>
+                </div>
+                """, unsafe_allow_html=True)
+            
             with col3:
                 if rsi1 > rsi2 * 1.05:
-                    st.markdown(f'<div class="verdict-text">🏆 <span style="color: #43e97b !important;">{ep1_short}</span> значительно лучше по RSI!</div>', unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class="verdict-card" style="border-color: #43e97b;">
+                        <strong style="color: #43e97b !important;">🏆 Победитель</strong><br>
+                        <span style="color: #43e97b !important;">{ep1_short}</span><br>
+                        <span>значительно лучше по RSI!</span>
+                    </div>
+                    """, unsafe_allow_html=True)
                 elif rsi1 > rsi2:
-                    st.markdown(f'<div class="verdict-text">🏆 <span style="color: #4facfe !important;">{ep1_short}</span> лучше по RSI!</div>', unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class="verdict-card" style="border-color: #4facfe;">
+                        <strong style="color: #4facfe !important;">🏆 Победитель</strong><br>
+                        <span style="color: #4facfe !important;">{ep1_short}</span><br>
+                        <span>лучше по RSI!</span>
+                    </div>
+                    """, unsafe_allow_html=True)
                 elif rsi2 > rsi1 * 1.05:
-                    st.markdown(f'<div class="verdict-text">🏆 <span style="color: #43e97b !important;">{ep2_short}</span> значительно лучше по RSI!</div>', unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class="verdict-card" style="border-color: #43e97b;">
+                        <strong style="color: #43e97b !important;">🏆 Победитель</strong><br>
+                        <span style="color: #43e97b !important;">{ep2_short}</span><br>
+                        <span>значительно лучше по RSI!</span>
+                    </div>
+                    """, unsafe_allow_html=True)
                 elif rsi2 > rsi1:
-                    st.markdown(f'<div class="verdict-text">🏆 <span style="color: #4facfe !important;">{ep2_short}</span> лучше по RSI!</div>', unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class="verdict-card" style="border-color: #4facfe;">
+                        <strong style="color: #4facfe !important;">🏆 Победитель</strong><br>
+                        <span style="color: #4facfe !important;">{ep2_short}</span><br>
+                        <span>лучше по RSI!</span>
+                    </div>
+                    """, unsafe_allow_html=True)
                 else:
-                    st.markdown('<div class="verdict-text">🤝 Выпуски примерно равны по RSI!</div>', unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class="verdict-card" style="border-color: #f6d365;">
+                        <strong style="color: #f6d365 !important;">🤝 Ничья</strong><br>
+                        <span>Выпуски примерно равны по RSI!</span>
+                    </div>
+                    """, unsafe_allow_html=True)
