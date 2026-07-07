@@ -955,7 +955,7 @@ elif page == "📋 Анализ выпуска":
     
     st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
     period = st.radio(
-        "Выберите период анализа:",
+        "📅 Выберите период анализа:",
         ["1 день", "1 неделя", "1 месяц", "Всё время"],
         horizontal=True,
         index=3,
@@ -1189,7 +1189,7 @@ else:
     
     st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
     period = st.radio(
-        "Выберите период для сравнения:",
+        "📅 Выберите период для сравнения:",
         ["1 день", "1 неделя", "1 месяц", "Всё время"],
         horizontal=True,
         index=3,
