@@ -914,28 +914,25 @@ if page == "📊 Общая аналитика":
 elif page == "📋 Анализ выпуска":
     st.markdown('<div class="page-title">📋 Детальный анализ выпуска</div>', unsafe_allow_html=True)
 
-    # ВОТ СЮДА ВСТАВЛЯЕМ CSS ДЛЯ RADIO BUTTONS
+    # Перед radio button на странице 2 и 3
     st.markdown("""
     <style>
-        div[role="radiogroup"] label {
-            background: linear-gradient(135deg, #f093fb 0%, #4facfe 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        div[role="radiogroup"] label p {
+            color: #ffffff !important;
             font-weight: 700 !important;
             font-size: 1.1rem !important;
-        }
-        
-        div[role="radiogroup"] label:hover {
-            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            transform: scale(1.05);
-            transition: all 0.3s ease;
+            text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
         }
     </style>
     """, unsafe_allow_html=True)
+    
+    st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
+    period = st.radio(
+        "",
+        ["1 день", "1 неделя", "1 месяц", "Всё время"],
+        horizontal=True,
+        index=3
+    )
     
     st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
     period = st.radio(
@@ -1166,28 +1163,25 @@ elif page == "📋 Анализ выпуска":
 else:
     st.markdown('<div class="page-title">🔄 Сравнение двух выпусков</div>', unsafe_allow_html=True)
 
-    # ВОТ СЮДА ВСТАВЛЯЕМ CSS ДЛЯ RADIO BUTTONS
+        # Перед radio button на странице 2 и 3
     st.markdown("""
     <style>
-        div[role="radiogroup"] label {
-            background: linear-gradient(135deg, #f093fb 0%, #4facfe 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        div[role="radiogroup"] label p {
+            color: #ffffff !important;
             font-weight: 700 !important;
             font-size: 1.1rem !important;
-        }
-        
-        div[role="radiogroup"] label:hover {
-            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            transform: scale(1.05);
-            transition: all 0.3s ease;
+            text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
         }
     </style>
     """, unsafe_allow_html=True)
+    
+    st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
+    period = st.radio(
+        "",
+        ["1 день", "1 неделя", "1 месяц", "Всё время"],
+        horizontal=True,
+        index=3
+    )
     
     st.markdown('<div class="period-label">📅 Период</div>', unsafe_allow_html=True)
     period = st.radio(
@@ -1447,8 +1441,31 @@ else:
             
             st.plotly_chart(fig_streams, use_container_width=True)
             
-            # Итоговый вердикт
+                        # Итоговый вердикт
             st.markdown("---")
+            
+            # CSS для вердикта и radio buttons
+            st.markdown("""
+            <style>
+                /* Радио кнопки */
+                div[role="radiogroup"] label p {
+                    color: #ffffff !important;
+                    font-weight: 700 !important;
+                    font-size: 1.1rem !important;
+                    text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
+                }
+                
+                /* Вердикт */
+                .verdict-text {
+                    color: #ffffff !important;
+                    font-size: 1.2rem !important;
+                    font-weight: 700 !important;
+                    text-shadow: 0 0 25px rgba(79, 172, 254, 0.8) !important;
+                    padding: 1rem !important;
+                }
+            </style>
+            """, unsafe_allow_html=True)
+            
             st.markdown('<div class="section-title">🏆 Итоговый вердикт</div>', unsafe_allow_html=True)
             
             col1, col2, col3 = st.columns([1, 1, 2])
@@ -1458,12 +1475,12 @@ else:
                 st.metric(f"⭐ RSI {ep2_short}", f"{rsi2:.1f}")
             with col3:
                 if rsi1 > rsi2 * 1.05:
-                    st.success(f"🏆 **{ep1_short}** значительно лучше по RSI!")
+                    st.markdown(f'<div class="verdict-text">🏆 <span style="color: #43e97b !important;">{ep1_short}</span> значительно лучше по RSI!</div>', unsafe_allow_html=True)
                 elif rsi1 > rsi2:
-                    st.success(f"🏆 **{ep1_short}** лучше по RSI!")
+                    st.markdown(f'<div class="verdict-text">🏆 <span style="color: #4facfe !important;">{ep1_short}</span> лучше по RSI!</div>', unsafe_allow_html=True)
                 elif rsi2 > rsi1 * 1.05:
-                    st.success(f"🏆 **{ep2_short}** значительно лучше по RSI!")
+                    st.markdown(f'<div class="verdict-text">🏆 <span style="color: #43e97b !important;">{ep2_short}</span> значительно лучше по RSI!</div>', unsafe_allow_html=True)
                 elif rsi2 > rsi1:
-                    st.success(f"🏆 **{ep2_short}** лучше по RSI!")
+                    st.markdown(f'<div class="verdict-text">🏆 <span style="color: #4facfe !important;">{ep2_short}</span> лучше по RSI!</div>', unsafe_allow_html=True)
                 else:
-                    st.info("🤝 Выпуски примерно равны по RSI!")
+                    st.markdown('<div class="verdict-text">🤝 Выпуски примерно равны по RSI!</div>', unsafe_allow_html=True)
