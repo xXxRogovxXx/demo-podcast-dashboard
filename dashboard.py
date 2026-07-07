@@ -348,12 +348,24 @@ st.markdown("""
         font-weight: bold;
     }
 
-     /* Стили для label radio button */
-    div[data-testid="stRadio"] > label > p {
+    /* Принудительно белый цвет для ВСЕХ label у radio */
+    .stRadio label {
         color: #ffffff !important;
-        font-size: 1.2rem !important;
-        font-weight: 700 !important;
-        text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
+    }
+    
+    .stRadio label p {
+        color: #ffffff !important;
+        font-size: 1.15rem !important;
+        font-weight: 600 !important;
+        text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
+    }
+    
+    /* Переопределение для всех параграфов внутри radio */
+    div[class*="stRadio"] p {
+        color: #ffffff !important;
+        font-size: 1.15rem !important;
+        font-weight: 600 !important;
+        text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important;
     }
     
 </style>
@@ -962,16 +974,6 @@ if page == "📊 Общая аналитика":
 elif page == "📋 Анализ выпуска":
     st.markdown('<div class="page-title">📋 Детальный анализ выпуска</div>', unsafe_allow_html=True)
     
-    st.markdown("""
-    <style>
-        div[data-testid="stRadio"] label p {
-            color: #ffffff !important;
-            font-size: 1.2rem !important;
-            font-weight: 700 !important;
-            text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
 
     period = st.radio(
     "📅 Выберите период анализа:",
@@ -1206,17 +1208,6 @@ elif page == "📋 Анализ выпуска":
 else:
     st.markdown('<div class="page-title">🔄 Сравнение двух выпусков</div>', unsafe_allow_html=True)
     
-    st.markdown("""
-    <style>
-        div[data-testid="stRadio"] label p {
-            color: #ffffff !important;
-            font-size: 1.2rem !important;
-            font-weight: 700 !important;
-            text-shadow: 0 0 20px rgba(240, 147, 251, 0.6) !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
     period = st.radio(
     "📅 Выберите период анализа:",
     ["1 день", "1 неделя", "1 месяц", "Всё время"],
