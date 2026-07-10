@@ -9,14 +9,90 @@ import base64
 from io import BytesIO
 
 # ============================================
-# НАСТРОЙКА СТРАНИЦЫ
+# КОНФИГУРАЦИЯ СТРАНИЦЫ — ДОЛЖНА БЫТЬ ПЕРВОЙ КОМАНДОЙ STREAMLIT
 # ============================================
-st.set_page_config(
-    page_title="🎙️ Подкаст Аналитика Pro",
-    page_icon="🎙️",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(layout="wide")
+
+# ============================================
+# НАСТРОЙКА ВАЖНЫХ ДАТ (ФИЧЕРИНГИ)
+# ============================================
+# Добавляйте новые даты в этот словарь для отображения на всех линейных графиках
+IMPORTANT_DATES = {
+    "2025-05-19": {"label": "🎤 Фичеринг 1", "color": "#FFD700", "dash": "dash"},
+    "2025-09-15": {"label": "🎤 Фичеринг 2", "color": "#FF6B6B", "dash": "dot"},
+    # Пример добавления новой даты:
+    # "2025-01-10": {"label": "🎤 Фичеринг 3", "color": "#4ECDC4", "dash": "dashdot"},
+}
+
+def add_important_dates_to_fig(fig, date_column="Дата прослушивания"):
+    """
+    Добавляет вертикальные линии с метками для важных дат на график Plotly.
+    Работает с обычными графиками и с subplots (вторичная ось).
+    
+    Параметры:
+    - fig: объект графика Plotly
+    - date_column: название столбца с датами (по умолчанию 'Дата прослушивания')
+    """
+    for date_str, props in IMPORTANT_DATES.items():
+        try:
+            # Пробуем стандартный метод add_vline
+            fig.add_vline(
+                x=pd.to_datetime(date_str),
+                line_dash=props.get("dash", "dash"),
+                line_color=props.get("color", "#FFD700"),
+                line_width=2,
+                annotation_text=props.get("label", ""),
+                annotation_position="top",
+                annotation_font=dict(
+                    color=props.get("color", "#FFD700"),
+                    size=10,
+                    family="Arial"
+                ),
+                annotation_bgcolor="rgba(0,0,0,0.7)",
+                layer="below"
+            )
+        except Exception as e:
+            # Если не получается (например, с subplots), добавляем shape вручную
+            try:
+                # Определяем, есть ли вторичная ось
+                has_secondary = hasattr(fig, '_grid_ref') and fig._grid_ref is not None
+                
+                if has_secondary:
+                    # Для subplots добавляем линию на основную ось
+                    fig.add_shape(
+                        type="line",
+                        x0=pd.to_datetime(date_str),
+                        x1=pd.to_datetime(date_str),
+                        y0=0,
+                        y1=1,
+                        yref="paper",
+                        line=dict(
+                            color=props.get("color", "#FFD700"),
+                            width=2,
+                            dash=props.get("dash", "dash")
+                        ),
+                        layer="below"
+                    )
+                    # Добавляем аннотацию
+                    fig.add_annotation(
+                        x=pd.to_datetime(date_str),
+                        y=1.02,
+                        yref="paper",
+                        text=props.get("label", ""),
+                        showarrow=False,
+                        font=dict(
+                            color=props.get("color", "#FFD700"),
+                            size=10,
+                            family="Arial"
+                        ),
+                        bgcolor="rgba(0,0,0,0.7)",
+                        xanchor="center"
+                    )
+            except:
+                # Если совсем не получается, пропускаем эту дату
+                pass
+    
+    return fig
 
 # ============================================
 # ФУНКЦИЯ ДЛЯ ПОДСКАЗОК К ГРАФИКАМ
@@ -128,8 +204,46 @@ st.markdown("""
     .stSelectbox label { color: #ffffff !important; font-weight: 600 !important; font-size: 1.1rem !important; text-shadow: 0 0 15px rgba(240, 147, 251, 0.5) !important; }
     div[data-testid="stMetric"] label { color: #ffffff !important; font-weight: 600 !important; font-size: 1rem !important; text-shadow: 0 0 10px rgba(240, 147, 251, 0.4) !important; }
     div[data-testid="stMetric"] div[data-testid="stMetricValue"] { color: #f093fb !important; font-weight: 700 !important; }
+    .important-dates-legend {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 0.8rem 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+    }
+    .date-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: rgba(0,0,0,0.3);
+        padding: 0.2rem 0.6rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+    }
 </style>
 """, unsafe_allow_html=True)
+
+# ============================================
+# ОТОБРАЖЕНИЕ ЛЕГЕНДЫ ВАЖНЫХ ДАТ
+# ============================================
+def show_important_dates_legend():
+    """Показывает легенду с важными датами в сайдбаре или вверху страницы"""
+    if IMPORTANT_DATES:
+        legend_html = '<div class="important-dates-legend">'
+        legend_html += '<span style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">📅 Важные даты: </span>'
+        for date_str, props in IMPORTANT_DATES.items():
+            date_obj = pd.to_datetime(date_str)
+            legend_html += f'<span class="date-badge">'
+            legend_html += f'<span style="color: {props["color"]}; font-size: 1.2rem;">●</span>'
+            legend_html += f'<span style="color: white;">{props["label"]}</span>'
+            legend_html += f'<span style="color: rgba(255,255,255,0.5);">({date_obj.strftime("%d.%m.%Y")})</span>'
+            legend_html += '</span>'
+        legend_html += '</div>'
+        st.markdown(legend_html, unsafe_allow_html=True)
 
 # ============================================
 # ФУНКЦИЯ ДЛЯ ЭКСПОРТА В PDF
@@ -146,44 +260,29 @@ def get_pdf_download_link(df, filename="report.pdf"):
         import tempfile
         import os
         
+        # Ищем шрифт в нескольких местах (для Streamlit Cloud)
         font_paths = [
-            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-            '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
-            '/System/Library/Fonts/Helvetica.ttf',
-            'C:/Windows/Fonts/arial.ttf',
+            'DejaVuSans.ttf',  # В корне проекта
+            './DejaVuSans.ttf',
+            os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf'),
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',  # Системный в Linux
         ]
         
         font_registered = False
         for font_path in font_paths:
-            if os.path.exists(font_path):
-                try:
-                    pdfmetrics.registerFont(TTFont('UnicodeFont', font_path))
+            try:
+                if os.path.exists(font_path):
+                    pdfmetrics.registerFont(TTFont('CyrillicFont', font_path))
                     font_registered = True
                     break
-                except:
-                    continue
+            except:
+                continue
         
-        use_translit = not font_registered
-        
-        def fix_text(text):
-            if not use_translit and font_registered:
-                return text
-            translit_map = {
-                'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
-                'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
-                'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
-                'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
-                'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
-                'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'E',
-                'Ж': 'Zh', 'З': 'Z', 'И': 'I', 'Й': 'Y', 'К': 'K', 'Л': 'L', 'М': 'M',
-                'Н': 'N', 'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U',
-                'Ф': 'F', 'Х': 'H', 'Ц': 'Ts', 'Ч': 'Ch', 'Ш': 'Sh', 'Щ': 'Sch',
-                'Ъ': '', 'Ы': 'Y', 'Ь': '', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya'
-            }
-            result = ''
-            for char in text:
-                result += translit_map.get(char, char)
-            return result
+        # Если не нашли — используем Helvetica как запасной
+        if not font_registered:
+            font_name = 'Helvetica'
+        else:
+            font_name = 'CyrillicFont'
         
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
             pdf_path = tmp_file.name
@@ -193,21 +292,47 @@ def get_pdf_download_link(df, filename="report.pdf"):
                                topMargin=72, bottomMargin=72)
         
         styles = getSampleStyleSheet()
-        font_name = 'UnicodeFont' if font_registered else 'Helvetica'
         
-        title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=20,
-                                   textColor=colors.HexColor('#f5576c'), spaceAfter=20, alignment=1, fontName=font_name)
-        heading_style = ParagraphStyle('CustomHeading', parent=styles['Heading2'], fontSize=14,
-                                     textColor=colors.HexColor('#4facfe'), spaceAfter=10, spaceBefore=15, fontName=font_name)
-        normal_style = ParagraphStyle('Normal', parent=styles['Normal'], fontSize=10, fontName=font_name)
+        title_style = ParagraphStyle(
+            'CustomTitle', 
+            parent=styles['Heading1'], 
+            fontSize=20,
+            textColor=colors.HexColor('#f5576c'), 
+            spaceAfter=20, 
+            alignment=1, 
+            fontName=font_name
+        )
+        
+        heading_style = ParagraphStyle(
+            'CustomHeading', 
+            parent=styles['Heading2'], 
+            fontSize=14,
+            textColor=colors.HexColor('#4facfe'), 
+            spaceAfter=10, 
+            spaceBefore=15, 
+            fontName=font_name
+        )
+        
+        normal_style = ParagraphStyle(
+            'Normal', 
+            parent=styles['Normal'], 
+            fontSize=10, 
+            fontName=font_name
+        )
         
         story = []
-        story.append(Paragraph(fix_text("🎙️ Подкаст Аналитика - Отчет"), title_style))
-        story.append(Paragraph(fix_text(f"📅 Дата: {datetime.now().strftime('%d.%m.%Y %H:%M')}"), normal_style))
-        story.append(Paragraph(fix_text(f"📊 Период: {df['Дата прослушивания'].min().date()} — {df['Дата прослушивания'].max().date()}"), normal_style))
+        
+        # Заголовок
+        story.append(Paragraph("🎙️ Подкаст Аналитика - Отчет", title_style))
+        story.append(Paragraph(f"📅 Дата: {datetime.now().strftime('%d.%m.%Y %H:%M')}", normal_style))
+        story.append(Paragraph(
+            f"📊 Период: {df['Дата прослушивания'].min().date()} — {df['Дата прослушивания'].max().date()}", 
+            normal_style
+        ))
         story.append(Spacer(1, 15))
         
-        story.append(Paragraph(fix_text("📊 Общая статистика"), heading_style))
+        # Общая статистика
+        story.append(Paragraph("📊 Общая статистика", heading_style))
         total_starts = df['Старты'].sum()
         total_streams = df['Стримы'].sum()
         conversion = (total_streams / total_starts * 100) if total_starts > 0 else 0
@@ -215,20 +340,22 @@ def get_pdf_download_link(df, filename="report.pdf"):
         avg_completion = df['Дослушиваемость'].mean() * 100
         unique_episodes = df['Выпуск'].nunique()
         
-        stats_data = [[fix_text('📌 Метрика'), fix_text('📊 Значение')],
-                     [fix_text('Всего стартов'), f'{total_starts:,}'],
-                     [fix_text('Всего стримов'), f'{total_streams:,}'],
-                     [fix_text('Конверсия'), f'{conversion:.1f}%'],
-                     [fix_text('Средний % прослушивания'), f'{avg_listen:.1f}%'],
-                     [fix_text('Средняя дослушиваемость'), f'{avg_completion:.1f}%'],
-                     [fix_text('Количество выпусков'), f'{unique_episodes}']]
+        stats_data = [
+            ['📌 Метрика', '📊 Значение'],
+            ['Всего стартов', f'{total_starts:,}'],
+            ['Всего стримов', f'{total_streams:,}'],
+            ['Конверсия', f'{conversion:.1f}%'],
+            ['Средний % прослушивания', f'{avg_listen:.1f}%'],
+            ['Средняя дослушиваемость', f'{avg_completion:.1f}%'],
+            ['Количество выпусков', f'{unique_episodes}']
+        ]
         
         stats_table = Table(stats_data, colWidths=[3*inch, 2.5*inch])
         stats_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (1, 0), colors.HexColor('#4facfe')),
             ('TEXTCOLOR', (0, 0), (1, 0), colors.white),
             ('ALIGN', (0, 0), (1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (1, 0), font_name),
+            ('FONTNAME', (0, 0), (1, -1), font_name),
             ('FONTSIZE', (0, 0), (1, 0), 11),
             ('BOTTOMPADDING', (0, 0), (1, 0), 10),
             ('BACKGROUND', (0, 1), (1, -1), colors.HexColor('#f8f9fa')),
@@ -239,22 +366,29 @@ def get_pdf_download_link(df, filename="report.pdf"):
         story.append(stats_table)
         story.append(Spacer(1, 15))
         
-        story.append(Paragraph(fix_text("🏆 Топ выпусков по популярности"), heading_style))
+        # Топ выпусков
+        story.append(Paragraph("🏆 Топ выпусков по популярности", heading_style))
         top_episodes = df.groupby(['Выпуск', 'Короткое название']).agg({
             'Старты': 'sum', 'Стримы': 'sum', 'Дослушиваемость': 'mean'
         }).reset_index().sort_values('Старты', ascending=False).head(10)
         
-        top_data = [[fix_text('#'), fix_text('Название'), fix_text('Старты'), fix_text('Стримы'), fix_text('Дослуш.')]]
+        top_data = [['#', 'Название', 'Старты', 'Стримы', 'Дослуш.']]
         for i, (_, row) in enumerate(top_episodes.iterrows()):
             name = row['Короткое название'][:40] if len(row['Короткое название']) > 40 else row['Короткое название']
-            top_data.append([str(i+1), fix_text(name), f"{row['Старты']:,}", f"{row['Стримы']:,}", f"{row['Дослушиваемость']*100:.1f}%"])
+            top_data.append([
+                str(i+1), 
+                name, 
+                f"{row['Старты']:,}", 
+                f"{row['Стримы']:,}", 
+                f"{row['Дослушиваемость']*100:.1f}%"
+            ])
         
         top_table = Table(top_data, colWidths=[0.4*inch, 2.8*inch, 1*inch, 1*inch, 1*inch])
         top_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f5576c')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), font_name),
+            ('FONTNAME', (0, 0), (-1, -1), font_name),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
             ('GRID', (0, 0), (-1, -1), 1, colors.grey),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
@@ -263,22 +397,29 @@ def get_pdf_download_link(df, filename="report.pdf"):
         story.append(top_table)
         story.append(Spacer(1, 15))
         
-        story.append(Paragraph(fix_text("🏆 Зал славы (лучшая дослушиваемость)"), heading_style))
+        # Зал славы
+        story.append(Paragraph("🏆 Зал славы (лучшая дослушиваемость)", heading_style))
         hall_of_fame = df.groupby(['Выпуск', 'Короткое название']).agg({
             'Дослушиваемость': 'mean', 'Старты': 'sum', 'Средний_прослушивания': 'mean'
         }).reset_index().sort_values('Дослушиваемость', ascending=False).head(10)
         
-        hall_data = [[fix_text('#'), fix_text('Название'), fix_text('Дослуш.'), fix_text('Старты'), fix_text('Средний %')]]
+        hall_data = [['#', 'Название', 'Дослуш.', 'Старты', 'Средний %']]
         for i, (_, row) in enumerate(hall_of_fame.iterrows()):
             name = row['Короткое название'][:40] if len(row['Короткое название']) > 40 else row['Короткое название']
-            hall_data.append([str(i+1), fix_text(name), f"{row['Дослушиваемость']*100:.1f}%", f"{row['Старты']:,}", f"{row['Средний_прослушивания']*100:.1f}%"])
+            hall_data.append([
+                str(i+1), 
+                name, 
+                f"{row['Дослушиваемость']*100:.1f}%", 
+                f"{row['Старты']:,}", 
+                f"{row['Средний_прослушивания']*100:.1f}%"
+            ])
         
         hall_table = Table(hall_data, colWidths=[0.4*inch, 2.8*inch, 1*inch, 1*inch, 1*inch])
         hall_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#43e97b')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), font_name),
+            ('FONTNAME', (0, 0), (-1, -1), font_name),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
             ('GRID', (0, 0), (-1, -1), 1, colors.grey),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
@@ -287,22 +428,29 @@ def get_pdf_download_link(df, filename="report.pdf"):
         story.append(hall_table)
         story.append(Spacer(1, 15))
         
-        story.append(Paragraph(fix_text("⚠️ Зона риска (худшая дослушиваемость)"), heading_style))
+        # Зона риска
+        story.append(Paragraph("⚠️ Зона риска (худшая дослушиваемость)", heading_style))
         danger_zone = df.groupby(['Выпуск', 'Короткое название']).agg({
             'Дослушиваемость': 'mean', 'Старты': 'sum', 'Средний_прослушивания': 'mean'
         }).reset_index().sort_values('Дослушиваемость', ascending=True).head(10)
         
-        danger_data = [[fix_text('#'), fix_text('Название'), fix_text('Дослуш.'), fix_text('Старты'), fix_text('Средний %')]]
+        danger_data = [['#', 'Название', 'Дослуш.', 'Старты', 'Средний %']]
         for i, (_, row) in enumerate(danger_zone.iterrows()):
             name = row['Короткое название'][:40] if len(row['Короткое название']) > 40 else row['Короткое название']
-            danger_data.append([str(i+1), fix_text(name), f"{row['Дослушиваемость']*100:.1f}%", f"{row['Старты']:,}", f"{row['Средний_прослушивания']*100:.1f}%"])
+            danger_data.append([
+                str(i+1), 
+                name, 
+                f"{row['Дослушиваемость']*100:.1f}%", 
+                f"{row['Старты']:,}", 
+                f"{row['Средний_прослушивания']*100:.1f}%"
+            ])
         
         danger_table = Table(danger_data, colWidths=[0.4*inch, 2.8*inch, 1*inch, 1*inch, 1*inch])
         danger_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f5576c')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), font_name),
+            ('FONTNAME', (0, 0), (-1, -1), font_name),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
             ('GRID', (0, 0), (-1, -1), 1, colors.grey),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
@@ -311,8 +459,16 @@ def get_pdf_download_link(df, filename="report.pdf"):
         story.append(danger_table)
         story.append(Spacer(1, 15))
         
-        footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=colors.grey, alignment=1, fontName=font_name)
-        story.append(Paragraph(fix_text("🎙️ Подкаст Аналитика Pro • Сгенерировано автоматически"), footer_style))
+        # Подвал
+        footer_style = ParagraphStyle(
+            'Footer', 
+            parent=styles['Normal'], 
+            fontSize=8, 
+            textColor=colors.grey, 
+            alignment=1, 
+            fontName=font_name
+        )
+        story.append(Paragraph("🎙️ Подкаст Аналитика Pro • Сгенерировано автоматически", footer_style))
         
         doc.build(story)
         
@@ -323,7 +479,9 @@ def get_pdf_download_link(df, filename="report.pdf"):
         b64 = base64.b64encode(pdf_data).decode()
         href = f'<a href="data:application/pdf;base64,{b64}" download="{filename}" style="display: inline-block; background: linear-gradient(135deg, #4facfe, #f093fb); color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1.1rem;">📥 Скачать отчет (PDF)</a>'
         return href
-    except:
+        
+    except Exception as e:
+        # В случае ошибки — отдаем CSV
         return get_csv_download_link(df)
 
 def get_csv_download_link(df, filename="report.csv"):
@@ -512,6 +670,15 @@ st.markdown('<div class="sub-title">ПРЕМИУМ ДАШБОРД • АНАЛИ
 # ============================================
 page = st.sidebar.radio("📊 Меню", ["📊 Общая аналитика", "📋 Анализ выпуска", "🔄 Сравнение выпусков"], index=0)
 
+# Показываем легенду важных дат в сайдбаре
+with st.sidebar:
+    st.markdown("---")
+    st.markdown("### 📅 Важные даты")
+    for date_str, props in IMPORTANT_DATES.items():
+        date_obj = pd.to_datetime(date_str)
+        st.markdown(f'<span style="color: {props["color"]}; font-size: 1.2rem;">●</span> <span style="color: white;">{props["label"]}</span> <span style="color: rgba(255,255,255,0.5);">({date_obj.strftime("%d.%m.%Y")})</span>', unsafe_allow_html=True)
+    st.markdown("---")
+
 # ============================================
 # СТРАНИЦА 1: ОБЩАЯ АНАЛИТИКА
 # ============================================
@@ -546,6 +713,9 @@ if page == "📊 Общая аналитика":
 
     if selected_genre != 'Все':
         filtered_data = filtered_data[filtered_data['Жанр'] == selected_genre]
+
+    # ===== ПОКАЗЫВАЕМ ЛЕГЕНДУ ВАЖНЫХ ДАТ =====
+    show_important_dates_legend()
 
     # ===== КНОПКА ЭКСПОРТА =====
     st.markdown("### 📤 Экспорт отчета")
@@ -613,6 +783,10 @@ if page == "📊 Общая аналитика":
     fig1.add_trace(go.Scatter(x=daily_stats['Дата прослушивания'], y=daily_stats['Старты'], name='Старты', line=dict(color='#4facfe', width=3), fill='tozeroy', fillcolor='rgba(79, 172, 254, 0.15)', mode='lines+markers', marker=dict(size=6, color='white', line=dict(color='#4facfe', width=2))))
     fig1.add_trace(go.Scatter(x=daily_stats['Дата прослушивания'], y=daily_stats['Стримы'], name='Стримы', line=dict(color='#f5576c', width=3), fill='tozeroy', fillcolor='rgba(245, 87, 108, 0.15)', mode='lines+markers', marker=dict(size=6, color='white', line=dict(color='#f5576c', width=2))))
     fig1.add_trace(go.Scatter(x=daily_stats['Дата прослушивания'], y=daily_stats['Конверсия'], name='Конверсия (%)', line=dict(color='#43e97b', width=2, dash='dash'), mode='lines+markers', marker=dict(size=5, color='#43e97b')), secondary_y=True)
+    
+    # ДОБАВЛЯЕМ ВАЖНЫЕ ДАТЫ
+    fig1 = add_important_dates_to_fig(fig1)
+    
     fig1.update_layout(template='plotly_dark', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=500, hovermode='x unified', legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(color='white', size=12)), xaxis=dict(title='Дата', titlefont=dict(color='white', size=13), tickfont=dict(color='white', size=11), gridcolor='rgba(255,255,255,0.05)'), yaxis=dict(title='Количество', titlefont=dict(color='white', size=13), tickfont=dict(color='white', size=11), gridcolor='rgba(255,255,255,0.05)'), yaxis2=dict(title='Конверсия (%)', titlefont=dict(color='#43e97b', size=13), tickfont=dict(color='#43e97b', size=11), overlaying='y', side='right', showgrid=False))
     st.plotly_chart(fig1, use_container_width=True)
 
@@ -811,6 +985,9 @@ if page == "📊 Общая аналитика":
 elif page == "📋 Анализ выпуска":
     st.markdown('<div class="page-title">📋 Детальный анализ выпуска</div>', unsafe_allow_html=True)
     
+    # Показываем легенду важных дат
+    show_important_dates_legend()
+    
     period = st.radio(
         "📅 Выберите период анализа:",
         ["1 день", "1 неделя", "1 месяц", "Всё время"],
@@ -899,6 +1076,10 @@ elif page == "📋 Анализ выпуска":
             fig.add_trace(go.Scatter(x=daily_data['Дата прослушивания'], y=daily_data['Стримы'], name='Стримы', line=dict(color='#f5576c', width=3), fill='tozeroy', fillcolor='rgba(245, 87, 108, 0.15)'))
             fig.add_shape(type="line", x0=release_date, y0=0, x1=release_date, y1=1, yref="paper", line=dict(color="#f093fb", width=2, dash="dash"))
             fig.add_annotation(x=release_date, y=0.98, yref="paper", text="📅 Релиз", showarrow=False, font=dict(color="#f093fb", size=12), textangle=-90)
+            
+            # ДОБАВЛЯЕМ ВАЖНЫЕ ДАТЫ
+            fig = add_important_dates_to_fig(fig)
+            
             fig.update_layout(template='plotly_dark', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400, hovermode='x unified', legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(color='white')))
             st.plotly_chart(fig, use_container_width=True)
 
@@ -914,8 +1095,7 @@ elif page == "📋 Анализ выпуска":
                 fig_life.add_trace(go.Scatter(x=life_curve['День от релиза'], y=life_curve['Стримы_норм'], name='Стримы (накоплено)', line=dict(color='#f5576c', width=4), mode='lines+markers', marker=dict(size=8, color='white', line=dict(color='#f5576c', width=2)), fill='tozeroy', fillcolor='rgba(245, 87, 108, 0.15)', hovertemplate='День %{x}: %{y:.1f}%<extra></extra>'))
                 fig_life.add_trace(go.Scatter(x=life_curve['День от релиза'], y=life_curve['Стримы_накоп'], name='Стримы (абс.)', line=dict(color='#f093fb', width=2, dash='dash'), mode='lines', yaxis='y2', hovertemplate='День %{x}: %{y:,.0f} стримов<extra></extra>'))
                 
-                fig_life.update_layout(template='plotly_dark', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=450, hovermode='x unified', legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(color='white', size=12)), xaxis=dict(title='День от релиза', titlefont=dict(color='white', size=13), tickfont=dict(color='white', size=11), gridcolor='rgba(255,255,255,0.05)', range=[0, life_curve['День от релиза'].max() + 2]), yaxis=dict(title='% от всех стримов', titlefont=dict(color='#f5576c', size=13), tickfont=dict(color='white', size=11), gridcolor='rgba(255,255,255,0.05)', range=[0, 105]), yaxis2=dict(title='Стримы (абс.)', titlefont=dict(color='#f093fb', size=13), tickfont=dict(color='white', size=11), overlaying='y', side='right', showgrid=False))
-                
+                # Добавляем маркеры для 50% и 90%
                 try:
                     idx_50 = (life_curve['Стримы_норм'] >= 50).idxmax() if (life_curve['Стримы_норм'] >= 50).any() else None
                     if idx_50 is not None:
@@ -927,6 +1107,8 @@ elif page == "📋 Анализ выпуска":
                         fig_life.add_annotation(x=day_90, y=90, text=f"🎯 90% на день {int(day_90)}", showarrow=True, arrowhead=2, ax=20, ay=30, font=dict(color='#43e97b', size=11), arrowcolor='#43e97b')
                 except:
                     pass
+                
+                fig_life.update_layout(template='plotly_dark', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=450, hovermode='x unified', legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(color='white', size=12)), xaxis=dict(title='День от релиза', titlefont=dict(color='white', size=13), tickfont=dict(color='white', size=11), gridcolor='rgba(255,255,255,0.05)', range=[0, life_curve['День от релиза'].max() + 2]), yaxis=dict(title='% от всех стримов', titlefont=dict(color='#f5576c', size=13), tickfont=dict(color='white', size=11), gridcolor='rgba(255,255,255,0.05)', range=[0, 105]), yaxis2=dict(title='Стримы (абс.)', titlefont=dict(color='#f093fb', size=13), tickfont=dict(color='white', size=11), overlaying='y', side='right', showgrid=False))
                 
                 st.plotly_chart(fig_life, use_container_width=True)
                 
@@ -991,6 +1173,9 @@ elif page == "📋 Анализ выпуска":
 # ============================================
 else:
     st.markdown('<div class="page-title">🔄 Сравнение двух выпусков</div>', unsafe_allow_html=True)
+    
+    # Показываем легенду важных дат
+    show_important_dates_legend()
     
     period = st.radio(
         "📅 Выберите период анализа:",
